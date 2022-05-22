@@ -40,18 +40,18 @@ def hess(x):
     return np.array([[g11, g12], [g21, g22]])
 
 
-# In[91]:
+# In[3]:
 
 
 def LM(x0, mu0, err):
     path = []
     x, mu, f, g, G = x0, mu0, func(x0), grad(x0), hess(x0)
     while np.linalg.norm(g) > err:
-        u, d, v = np.linalg.svd(G + mu * np.eye(len(x0)))
-        while d[-1] <= 0:
-            mu = 4 * mu0
-            u, d, v = np.linalg.svd(G + mu * np.eye(len(x0))) 
-        s = -u @ np.diag(1 / d) @ v @ g
+        vals = np.linalg.eigvals(G + mu * np.eye(len(x0)))
+        while any(vals <= 0):
+            mu = 4 * mu
+            vals = np.linalg.eigvals(G + mu * np.eye(len(x0)))
+        s = -np.linalg.inv(G + mu * np.eye(len(x0))) @ g 
         _f = func(x + s)
         q = f + g.T @ s + 1 / 2 * s.T @ G @ s
         r = (_f - f) / (q - f)
@@ -64,7 +64,7 @@ def LM(x0, mu0, err):
     return path
 
 
-# In[120]:
+# In[4]:
 
 
 mu, err = 1, 0.0001
